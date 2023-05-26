@@ -19,18 +19,12 @@ app.use(cors());
 app.use(express.json());
 
 // RUTAS
-app.get("/test", (req, res) => {
-    console.log("Se ha ejecutado el end-pont /test");
-    return res.status(200).json([{
-        course: "Master en React",
-        autor: "Víctor Robles"
-    },{
-        course: "Python Ultimate",
-        autor: "Nícolas Schurmann"
-    }]);
-});
+const rutas_articulo = require('./routes/articles');
 
+// Cargo las rutas
+app.use("/api", rutas_articulo);
 
+// Rutas hardcodeadas
 app.get("/", (req, res) => {
     console.log("Se ha ejecutado el end-pont /");
     return res.status(200).send(`
