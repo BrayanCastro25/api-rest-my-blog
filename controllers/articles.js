@@ -20,7 +20,6 @@ const courses = (req, res) => {
 }   
 
 const create = (req, res) => {
-
     // Recoger parámetros por POST a guardar
     let parameters = req.body;
 
@@ -52,20 +51,45 @@ const create = (req, res) => {
                 status: "success",
                 article: articleSaved,
                 message: "Article was saved successfully!!"
-            })
+            });
         })
         .catch((error) => {
             console.log(error);
             return res.status(400).json({
                 status: "error",
                 message: "Article was not saved..."
-            })
+            });
         })
-     
+}
+
+const getArticles = (req, res) => {
+    Articulo.find({})
+        .then((articles) => {
+            if(!articles) {
+                return res.status(400).json({
+                    status: "error",
+                    message: "No se encontraron articulos..."
+                });
+            }
+            return res.status(200).send({
+                status: "success",
+                articles,
+            });
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                status: "error",
+                mensaje: "Ha ocurrido un error al listar los articulos",
+                error: error.message
+            });
+        })
+
+    
 }
 
 module.exports = {
     test,
     courses, 
-    create
+    create,
+    getArticles
 }

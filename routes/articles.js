@@ -9,5 +9,6 @@ router.get('/routes-of-courses', article_controller.courses)
 
 // Ruta útil
 router.post('/create', article_controller.create)
+router.get('/get-articles', article_controller.getArticles)
 
 module.exports = router;    
