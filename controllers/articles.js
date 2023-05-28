@@ -25,12 +25,7 @@ const create = (req, res) => {
 
     // Validar datos
     try{
-        let validar_titulo = !validator.isEmpty(parameters.title) 
-        let validar_contenido = !validator.isEmpty(parameters.content); 
-
-        if(!validar_contenido || !validar_titulo){
-            throw new Error("No se ha validado la información");
-        }
+        validateData(parameters)
     }catch(error){
         return res.status(400).json({
             status: "error",
@@ -40,8 +35,6 @@ const create = (req, res) => {
 
     // Crear el objeto a guardar
     const new_article = new Articulo(parameters);
-
-    // Asignar valores a objeto basado en el modelo (manual o autómatico)
 
     // Guardar el articulo en la base de datos
     new_article.save()
@@ -145,11 +138,65 @@ const deleteArticle = (req, res) => {
         })
 }
 
+const validateData = (parameters) => {
+    let validar_titulo = !validator.isEmpty(parameters.title) 
+    let validar_contenido = !validator.isEmpty(parameters.content); 
+
+    if(!validar_contenido || !validar_titulo){
+        throw new Error("No se ha validado la información");
+    }
+}
+
+
+const updateArticle = (req, res) => {
+    // Obtener ID por la URL
+    let id = req.params.id;
+
+    // Recoger datos del body
+    let parameters = req.body;
+
+    // Validar datos
+    try{
+        validateData(parameters)
+    }catch(error){
+        return res.status(400).json({
+            status: "error",
+            mensaje: "Faltan datos por enviar"
+        })
+    }
+
+    // Buscar y actualizar articulo
+    Articulo.findOneAndUpdate({_id: id}, parameters, {new: true})
+        .then((article_updated) => {
+            if(!article_updated){
+                return res.status(400).json({
+                    status: "error",
+                    message: "No se logró actualizar el artículo por ID"
+                });
+            }
+            return res.status(200).json({
+                status: "success",
+                article_updated,
+                message: "Se actualizó el artículo por ID, satisfactoriamente"
+            });
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                status: "error",
+                error
+            });
+        })
+
+
+    // Dar una respuesta
+}
+
 module.exports = {
     test,
     courses, 
     create,
     getArticles, 
     oneArticle,
-    deleteArticle
+    deleteArticle,
+    updateArticle
 }

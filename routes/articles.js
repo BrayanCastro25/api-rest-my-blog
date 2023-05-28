@@ -12,6 +12,7 @@ router.post('/create', article_controller.create)
 router.get('/get-articles', article_controller.getArticles)
 router.get('/article/:id', article_controller.oneArticle)
 router.delete('/article/:id', article_controller.deleteArticle)
+router.put('/article/:id', article_controller.updateArticle)
 
 
 module.exports = router;    
