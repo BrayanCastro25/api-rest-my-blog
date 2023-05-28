@@ -1,4 +1,6 @@
+const fs = require('fs');
 const {validateData} = require('../helpers/validator');
+const path = require("path");
 
 const Articulo = require("../models/Articles");
 
@@ -182,6 +184,78 @@ const updateArticle = (req, res) => {
     // Dar una respuesta
 }
 
+
+const uploadImage = (req, res) => {
+    
+    // Configurar multer
+
+    // Recoger el fichero de imagen subido
+
+    // Nombre del archivo
+    if(!req.file && !req.files){
+        return res.status(404).json({
+            status: "error",
+            message: "Petición Invalida"
+        });
+    }
+    let name_file = req.file.originalname;
+    
+    // Extension del archivo
+    let file_split = name_file.split('\.');
+    let extension = file_split[1];
+
+    // Comprobar extensión correcta
+    if(extension != 'png' && extension != 'jpg' && extension != 'jpeg' && extension != 'gif'){
+        fs.unlink(req.file.path, (error) => {
+            return res.status(400).json({
+                status: "error",
+                message: "Archivo invalido"
+            }); 
+        })
+    }else{
+        let id = req.params.id
+
+        Articulo.findOneAndUpdate({_id: id}, {image: req.file.filename}, {new: true})
+        .then((file_updated) => {
+            if(!file_updated){
+                return res.status(400).json({
+                    status: "error",
+                    message: "No se logró subir la imagen para el artículo por ID"
+                });
+            }
+            return res.status(200).json({
+                status: "success",
+                file_updated,
+                message: "Se subió la imagen del artículo por ID, satisfactoriamente"
+            });
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                status: "error",
+                error
+            });
+        })
+    }
+
+}
+
+const viewImage = (req, res) => {
+    let archive = req.params.archive;
+    console.log(archive)
+    let route_archive = "./images/articles/" + archive;
+
+    fs.stat(route_archive, (error, exist) => {
+        if(exist){
+            return res.sendFile(path.resolve(route_archive));
+        }else{
+            return res.status(500).json({
+                status: "error",
+                error
+            });
+        }
+    })
+}
+
 module.exports = {
     test,
     courses, 
@@ -189,5 +263,7 @@ module.exports = {
     getArticles, 
     oneArticle,
     deleteArticle,
-    updateArticle
+    updateArticle,
+    uploadImage,
+    viewImage
 }
