@@ -63,7 +63,7 @@ const create = (req, res) => {
 }
 
 const getArticles = (req, res) => {
-    Articulo.find({})
+    Articulo.find({}).sort({date: -1}).limit(1)
         .then((articles) => {
             if(!articles) {
                 return res.status(400).json({
@@ -73,7 +73,8 @@ const getArticles = (req, res) => {
             }
             return res.status(200).send({
                 status: "success",
-                articles,
+                counter: articles.length,
+                articles
             });
         })
         .catch((error) => {
@@ -84,12 +85,71 @@ const getArticles = (req, res) => {
             });
         })
 
+}
+
+const oneArticle = (req, res) => {
+    // Obtener un ID por la URL
+    let id = req.params.id;
     
+    // Buscar el artículo
+    Articulo.findById(id)
+        .then((article) => {
+            // Si no existe devolver error
+            if(!article) {
+                return res.status(400).json({
+                    status: "error",
+                    message: "No se encontró el artículo especificado..."
+                });
+            }
+            // Devolver resultado
+            return res.status(200).send({
+                status: "success",
+                article
+            });
+        })
+
+        .catch((error) => {
+            return res.status(500).json({
+                status: "error",
+                mensaje: "Ha ocurrido un error al buscar el artículo por ID",
+                error: error.message
+            });
+        })
+
+}
+
+
+const deleteArticle = (req, res) => {
+    let id = req.params.id;
+    
+    Articulo.findOneAndDelete({_id: id})
+        .then((articulo_deleted) => {
+            if(!articulo_deleted){
+                return res.status(400).json({
+                    status: "error",
+                    message: "No se logró eliminar el artículo por ID..."
+                });
+            }
+            return res.status(200).json({
+                status: "success",
+                message: "Se eliminó el objeto exitosamente",
+                articulo_deleted
+            });
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                status: "error",
+                mensaje: "Ha ocurrido un error al eliminar el artículo por ID",
+                error: error.message
+            });
+        })
 }
 
 module.exports = {
     test,
     courses, 
     create,
-    getArticles
+    getArticles, 
+    oneArticle,
+    deleteArticle
 }
