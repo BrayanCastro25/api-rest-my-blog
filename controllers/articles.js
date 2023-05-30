@@ -256,6 +256,35 @@ const viewImage = (req, res) => {
     })
 }
 
+const search = (req, res) => {
+    let text_search = req.params.text_search;
+
+    Articulo.find({ "$or": [
+        {"title" : {"$regex" : text_search, "$options" : "i"}},
+        {"contents" : {"$regex" : text_search, "$options" : "i"}}
+    ]}).sort({fecha: -1})
+        .then((articulosEncontrados) => {
+            if(!articulosEncontrados || articulosEncontrados.length <= 0){
+                return res.status(400).json({
+                    status: "error",
+                    message: "No se logró encontrar ninguna coincidencia"
+                });
+            }
+            return res.status(200).json({
+                status: "success",
+                articulos: articulosEncontrados,
+                message: "Se encontraron las siguientes coincidencias"
+            });
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                status: "error",
+                error
+            });
+        })
+}
+
+
 module.exports = {
     test,
     courses, 
@@ -265,5 +294,6 @@ module.exports = {
     deleteArticle,
     updateArticle,
     uploadImage,
-    viewImage
+    viewImage,
+    search
 }
